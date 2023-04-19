@@ -93,7 +93,8 @@ function getUserDataFromReq(req) {
 }
 
 // test için endpoint
-app.get("/test", (req, res) => {
+// app.get("/test", (req, res) => {
+app.get("/api/test", (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   // her endpointe (logout hariç onun DB ile alakası yok) monggose ile mongo db ye erişim sağlamamız lazım, çünkü db'miz mongo
   res.json("test ok");
@@ -101,7 +102,7 @@ app.get("/test", (req, res) => {
 
 // register için endpoint
 // fe'de Register.jsx'de RegisterUser func içinde axios ile bir post oluşturduk bu postun içinde name, email ve password state'leri var, bunları burada oluşturduğumuz endpointe yollayacağız ve buradan da body içine console'da network içinde bakacağız gelmiş mi? ...Başarılı
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { name, email, password } = req.body;
   // fe'den gelen nesneyi DB'ye kaydedelim, bunun için model yapısına ihtiyacımız var, ./api/models/User.js oluştur, kullanıcı bilgisini burada tutacağız, User.js içinde UserModel'i hazırladık burada import et,
@@ -120,7 +121,7 @@ app.post("/register", async (req, res) => {
 });
 
 // login için endpoint
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   //req.body içinden email,password'u çek
   mongoose.connect(process.env.MONGO_URL);
   const { email, password } = req.body;
@@ -153,7 +154,7 @@ app.post("/login", async (req, res) => {
 });
 
 //profile için endpoint
-app.get("/profile", (req, res) => {
+app.get("/api/profile", (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { token } = req.cookies;
   //   res.json("user info");
@@ -170,13 +171,13 @@ app.get("/profile", (req, res) => {
 
 // logout için endpoint
 // token'ı boş string yapacak bu şekilde logout olmuş olacak, deneyelim, sayfayı yenileyince logout olmuş olduğunu gör
-app.post("/logout", (req, res) => {
+app.post("/api/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
 
 // upload by link için endpoint
 // console.log({ __dirname });
-app.post("/upload-by-link", async (req, res) => {
+app.post("/api/upload-by-link", async (req, res) => {
   // mongoose.connect(process.env.MONGO_URL);
   // burada mongoose'a ihtiyaç yok
   // requestten link'i alalım
@@ -204,26 +205,30 @@ app.post("/upload-by-link", async (req, res) => {
 // app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
 const photosMiddleware = multer({ dest: "/tmp" });
 // app.post("/upload", async (req, res) => {
-app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
-  const uploadedFiles = [];
-  for (let i = 0; i < req.files.length; i++) {
-    const { path, originalname, mimetype } = req.files[i];
-    // const parts = originalname.split(".");
-    // const ext = parts[parts.length - 1];
-    // const newPath = path + "." + ext;
-    // fs.renameSync(path, newPath);
-    // uploadedFiles.push(newPath.replace("uploads/", ""));
-    // bunlar uploadS3 func'a gidecek
-    const url = await uploadToS3(path, originalname, mimetype);
-    uploadedFiles.push(url);
+app.post(
+  "/api/upload",
+  photosMiddleware.array("photos", 100),
+  async (req, res) => {
+    const uploadedFiles = [];
+    for (let i = 0; i < req.files.length; i++) {
+      const { path, originalname, mimetype } = req.files[i];
+      // const parts = originalname.split(".");
+      // const ext = parts[parts.length - 1];
+      // const newPath = path + "." + ext;
+      // fs.renameSync(path, newPath);
+      // uploadedFiles.push(newPath.replace("uploads/", ""));
+      // bunlar uploadS3 func'a gidecek
+      const url = await uploadToS3(path, originalname, mimetype);
+      uploadedFiles.push(url);
+    }
+    // res.json(req.files);
+    res.json(uploadedFiles);
   }
-  // res.json(req.files);
-  res.json(uploadedFiles);
-});
+);
 
 // add new place için endpoint
 // Place adında bir model'imiz var zaten
-app.post("/places", (req, res) => {
+app.post("/api/places", (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { token } = req.cookies;
   const {
@@ -259,7 +264,7 @@ app.post("/places", (req, res) => {
 });
 
 // db'den belli bir user için places'ları alalım
-app.get("/user-places", (req, res) => {
+app.get("/api/user-places", (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -269,7 +274,7 @@ app.get("/user-places", (req, res) => {
 });
 
 // belli bir ilanın id'sini alıp o ilanın sayfasına gitmek
-app.get("/places/:id", async (req, res) => {
+app.get("/api/places/:id", async (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   // res.json(req.params);
   const { id } = req.params;
@@ -277,7 +282,7 @@ app.get("/places/:id", async (req, res) => {
 });
 
 // edit için endpoint
-app.put("/places", async (req, res) => {
+app.put("/api/places", async (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const { token } = req.cookies;
   const {
@@ -319,13 +324,13 @@ app.put("/places", async (req, res) => {
 });
 
 // bütün places ları alalım, user ayrımı olmadan
-app.get("/places", async (req, res) => {
+app.get("/api/places", async (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   res.json(await Place.find());
 });
 
 // book işlemi için endpoint
-app.post("/bookings", async (req, res) => {
+app.post("/api/bookings", async (req, res) => {
   // body'den aşağıdakileri çekelim
   // DB'ye kayıt için bize model lazım onu oluşturalım
   mongoose.connect(process.env.MONGO_URL);
@@ -351,7 +356,7 @@ app.post("/bookings", async (req, res) => {
 });
 
 // bookings getirmek için endpoint
-app.get("/bookings", async (req, res) => {
+app.get("/api/bookings", async (req, res) => {
   mongoose.connect(process.env.MONGO_URL);
   const userData = await getUserDataFromReq(req);
   res.json(await Booking.find({ user: userData.id }).populate("place"));

@@ -14,7 +14,8 @@ import BookingPage from "./pages/BookingPage";
 
 // axios için base url burada tanımla
 // axios.defaults.baseURL = "http://localhost:4000";
-// base url kısmını değiştirmeliyiz, yoksa deploy sonrası buraya ulaşmaya çalışır base olarak tabiki çalışmaz, bunun için ./client/.env oluştur, .env ye buradaki :4000'i yaz, ancak bunu vercel'e environment olarak eklerken key .envdeki ancak value kısmı  domain adresinin sonuna api ekle şöyle https://airbmx.vercel.app/api save, daha sonra kod değiştiği için github'a commit push la, deploymentten yeniden deploy et
+// base url kısmını değiştirmeliyiz, yoksa deploy sonrası buraya ulaşmaya çalışır base olarak tabiki çalışmaz, bunun için ./client/.env oluştur, .env ye buradaki :4000'i yaz, ancak bunu vercel'e environment olarak eklerken key .envdeki ancak value kısmı  domain adresinin sonuna api ekle şöyle https://airbmx.vercel.app/api save, daha sonra kod değiştiği için github'a commit push la, deploymentten yeniden deploy et, bu seferde api adresini bulamıyor bunun için ./api deği bütün endpointlere /api/... ekleyeceğiz
+
 // axios.defaults.baseURL = "http://127.0.0.1:4000";
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
 axios.defaults.withCredentials = true;
